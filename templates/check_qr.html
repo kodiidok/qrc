@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Checker</title>
+    <link rel="stylesheet" href="/static/scan_form.css" />
+    <script
+      src="https://unpkg.com/html5-qrcode"
+      type="text/javascript"
+    ></script>
+  </head>
+  <body>
+    <h1>QR Code Checker</h1>
+    <div
+      style="
+        color: #555;
+        text-align: center;
+        margin-top: -12px;
+        margin-bottom: 10px;
+        font-size: 1.05em;
+        opacity: 0.85;
+      "
+    >
+      Scan a QR code to check how many times it has been scanned
+    </div>
+    <div id="qr-card">
+      <div id="qr-reader"></div>
+      <div id="qr-result"></div>
+      <div
+        id="qr-report"
+        style="
+          margin-top: 20px;
+          padding: 15px;
+          background-color: #f5f5f5;
+          border-radius: 8px;
+          display: none;
+        "
+      >
+        <h3>Scan Report</h3>
+        <div id="report-content"></div>
+      </div>
+    </div>
+    <script>
+      function onScanSuccess(decodedText, decodedResult) {
+        document.getElementById("qr-result").innerText =
+          "Scanned: " + decodedText;
+
+        // Show loading
+        document.getElementById("qr-report").style.display = "block";
+        document.getElementById("report-content").innerHTML =
+          "Checking database...";
+
+        fetch("/check-qr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ qrData: decodedText }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              return res.json().then((err) => {
+                throw new Error(err.error || "Request failed");
+              });
+            }
+            return res.json();
+          })
+          .then((data) => {
+            // Show scan count and validation as an alert
+            const statusText = data.is_valid
+              ? "VALID (3+ scans)"
+              : "INVALID (<3 scans)";
+            alert(`Scan Count: ${data.scan_count}\nStatus: ${statusText}`);
+
+            let reportHtml = `<p><strong>QR Data:</strong> ${data.qr_data}</p>`;
+            reportHtml += `<p><strong>Scan Count:</strong> ${data.scan_count}</p>`;
+            reportHtml += `<p><strong>Message:</strong> ${data.message}</p>`;
+
+            // Add validation status with color coding
+            const isValid = data.is_valid;
+            const statusColor = isValid ? "green" : "red";
+            const statusTextHtml = isValid ? "VALID" : "INVALID";
+            reportHtml += `<p><strong>Status:</strong> <span style=\"color: ${statusColor}; font-weight: bold;\">${statusTextHtml}</span></p>`;
+            reportHtml += `<p><strong>Validation:</strong> ${
+              isValid
+                ? "QR code has been scanned 3+ times"
+                : "QR code needs to be scanned at least 3 times"
+            }</p>`;
+
+            if (data.scans && data.scans.length > 0) {
+              reportHtml += `<h4>Previous Scans:</h4><ul>`;
+              data.scans.forEach((scan) => {
+                reportHtml += `<li>Team: ${scan.team_name} | Time: ${scan.scan_time} | ID: ${scan.id}</li>`;
+              });
+              reportHtml += `</ul>`;
+            }
+
+            document.getElementById("report-content").innerHTML = reportHtml;
+          })
+          .catch((err) => {
+            document.getElementById(
+              "report-content"
+            ).innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+          });
+      }
+
+      let html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", {
+        fps: 10,
+        qrbox: 250,
+      });
+      html5QrcodeScanner.render(onScanSuccess);
+    </script>
+  </body>
+</html>
