@@ -1,7 +1,7 @@
 from database import get_db_cursor
 import uuid
 import csv
-from flask import Blueprint, request, jsonify, abort, send_file
+from flask import Blueprint, request, jsonify, abort, send_file, url_for
 from database import init_db, reset_db, get_db_stats
 from utils.helpers import init_teams_from_csv
 from utils.qr_generator import QRGenerator
@@ -91,3 +91,24 @@ def admin_init_teams():
         })
     except FileNotFoundError:
         return jsonify({"error": "CSV file not found"}), 404
+
+
+@admin_bp.route('/team-scanner-urls', methods=['GET'])
+def get_team_scanner_urls():
+    if not is_authorized():
+        abort(403)
+
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT id, team_name FROM teams")
+        teams = cursor.fetchall()
+
+    # Construct URLs
+    scanner_urls = [
+        {
+            "team_name": team["team_name"],
+            "scanner_url": url_for("team.team_scan_qr", team_id=team["id"], _external=True)
+        }
+        for team in teams
+    ]
+
+    return jsonify(scanner_urls)
