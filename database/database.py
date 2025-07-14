@@ -155,3 +155,28 @@ def get_db_stats():
             'visitors': visitors_count,
             'qr_codes': qr_codes_count
         }
+
+
+def get_team_by_id(team_id: str):
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT * FROM teams WHERE id = ?", (team_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_visitor_by_qr(qr_code: str):
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            'SELECT * FROM visitors WHERE visitor_qr = ?', (qr_code,))
+        return cursor.fetchone()
+
+
+def get_visitor_visit_log(qr_code: str):
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT team_name, visit_time
+            FROM visitor_visits
+            WHERE visitor_qr = ?
+            ORDER BY visit_time DESC
+        ''', (qr_code,))
+        return cursor.fetchall()

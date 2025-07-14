@@ -1,14 +1,18 @@
-#reader {
-    width: 500px;
-    margin: auto;
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 100px;
 }
 
-#result,
-#log {
-    margin-top: 20px;
-    font-size: 1.1em;
-    text-align: center;
+h1 {
+    font-size: 3em;
 }
+
+h2 {
+    font-size: 2em;
+    color: gray;
+}
+
 
 table {
     margin: 0 auto;
@@ -21,4 +25,16 @@ td {
     border: 1px solid #ccc;
     padding: 8px;
     text-align: left;
+}
+
+#reader {
+    width: 500px;
+    margin: auto;
+}
+
+#result,
+#log {
+    margin-top: 20px;
+    font-size: 1.1em;
+    text-align: center;
 }

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from database.database import get_db_cursor
+from database.database import get_db_cursor, get_visitor_by_qr, get_visitor_visit_log
 from utils.helpers import check_qr_code_exists, record_visitor_visit
 
 qr_bp = Blueprint('qr', __name__, url_prefix='/api')
@@ -37,9 +37,7 @@ def check_visitor():
 
     with get_db_cursor() as cursor:
         # Get total visits
-        cursor.execute(
-            'SELECT * FROM visitors WHERE visitor_qr = ?', (qr_code,))
-        visitor = cursor.fetchone()
+        visitor = get_visitor_by_qr(qr_code)
 
         if not visitor:
             return jsonify({"exists": False, "message": "Visitor not found"}), 404
@@ -55,13 +53,7 @@ def check_visitor():
             })
 
         # Get visit log
-        cursor.execute('''
-            SELECT team_name, visit_time
-            FROM visitor_visits
-            WHERE visitor_qr = ?
-            ORDER BY visit_time DESC
-        ''', (qr_code,))
-        visits = cursor.fetchall()
+        visits = get_visitor_visit_log(qr_code)
 
         visits_log = [
             {"team_name": v["team_name"], "visit_time": v["visit_time"]}
