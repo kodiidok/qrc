@@ -1,0 +1,6 @@
+.env
+venv/
+__pycache__/
+iot2025.db
+iot2025-dev.db
+gen/out

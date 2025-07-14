@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>QR Scanner - {{ team_name }}</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <h1 style="text-align:center;">{{ team_name }} - Scan QR Code</h1>
+
+    <div id="reader"></div>
+    <div id="result"></div>
+
+    <script>
+        const TEAM_ID = "{{ team_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/team_scan_qr.js') }}"></script>
+</body>
+
+</html>
