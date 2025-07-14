@@ -3,6 +3,8 @@ Configuration settings for the IOT Exhibition application
 """
 
 import os
+from dotenv import load_dotenv  # <-- for loading .env
+load_dotenv()
 
 
 class Config:
@@ -18,11 +20,11 @@ class Config:
     ]
 
     # Minimum visits required for sticker eligibility
-    MIN_VISITS_FOR_STICKER = int(os.getenv('MIN_VISITS_FOR_STICKER', 11))
+    MIN_VISITS_FOR_STICKER = int(os.getenv('MIN_VISITS_FOR_STICKER'))
 
     # QR Code generation settings
-    MAX_QR_CODES_PER_BATCH = int(os.getenv('MAX_QR_CODES_PER_BATCH', 1000))
-    DEFAULT_QR_CODE_COUNT = int(os.getenv('DEFAULT_QR_CODE_COUNT', 500))
+    MAX_QR_CODES_PER_BATCH = int(os.getenv('MAX_QR_CODES_PER_BATCH'))
+    DEFAULT_QR_CODE_COUNT = int(os.getenv('DEFAULT_QR_CODE_COUNT'))
 
     # Flask settings
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
@@ -43,13 +45,13 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    DB_NAME = os.getenv('DB_NAME', 'iot2025-dev.db')
+    DB_NAME = os.getenv('DB_NAME')
 
 
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    SECRET_KEY = os.getenv('SECRET_KEY', 'production-secret-key')
+    SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 class TestingConfig(Config):
