@@ -73,6 +73,7 @@ def init_db():
                 generated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_printed BOOLEAN DEFAULT FALSE,
                 is_distributed BOOLEAN DEFAULT FALSE,
+                deleted_time TIMESTAMP NULL DEFAULT NULL,
                 notes TEXT
             )
         ''')

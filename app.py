@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, render_template, abort
 from dotenv import load_dotenv  # <-- for loading .env
 from config import config
 from database import init_db, get_db_stats, reset_db
+from utils.qr_generator import QRGenerator
 
 # Load env variables from .env file
 load_dotenv()
@@ -57,8 +58,30 @@ def admin_reset_db():
 
 
 #
+#   QR
+#
+
+
+@app.route('/admin/init-qr-codes', methods=['POST'])
+def admin_init_qr_codes():
+    if not is_authorized():
+        abort(403, description="Unauthorized")
+    QRGenerator.init_qr_codes()
+    return jsonify({"message": "QR codes initialized."})
+
+
+@app.route('/admin/reset-qr-codes', methods=['POST'])
+def admin_reset_qr_codes():
+    if not is_authorized():
+        abort(403, description="Unauthorized")
+    QRGenerator.reset_qr_codes()
+    return jsonify({"message": "QR codes table cleared and reinitialized."})
+
+
+#
 #   APP
 #
+
 
 @app.route('/')
 def home():
