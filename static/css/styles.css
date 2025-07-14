@@ -1,0 +1,11 @@
+/* You can move this to a separate CSS file if you want */
+#reader {
+    width: 500px;
+    margin: auto;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 1.2em;
+    text-align: center;
+}

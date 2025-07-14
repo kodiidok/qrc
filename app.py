@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, render_template, abort, send_file
 from dotenv import load_dotenv  # <-- for loading .env
 from config import config
 from database import init_db, get_db_stats, reset_db
+from utils.helpers import check_qr_code_exists
 from utils.qr_generator import QRGenerator
 
 # Load env variables from .env file
@@ -91,6 +92,19 @@ def download_active_qr_codes():
                      as_attachment=True,
                      download_name='active_qr_codes.csv')
 
+
+@app.route('/api/check-qr', methods=['POST'])
+def check_qr():
+    data = request.get_json()
+    qr_code = data.get('qr_code', '').strip()
+
+    if not qr_code:
+        return jsonify({"error": "No QR code provided"}), 400
+
+    exists = check_qr_code_exists(qr_code)
+
+    return jsonify({"exists": exists, "qr_code": qr_code} if exists else {"exists": False})
+
 #
 #   APP
 #
@@ -99,6 +113,11 @@ def download_active_qr_codes():
 @app.route('/')
 def home():
     return f"App is running with config: {app.config['DB_NAME']}"
+
+
+@app.route('/scan-qr')
+def scan_qr():
+    return render_template('scan_qr.html')
 
 
 if __name__ == '__main__':
