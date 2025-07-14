@@ -2,6 +2,6 @@
 Utilities package initialization
 """
 
-from .helpers import check_qr_code_exists
+from .helpers import check_qr_code_exists, init_teams_from_csv
 
-__all__ = ['check_qr_code_exists']
+__all__ = ['check_qr_code_exists', 'init_teams_from_csv']

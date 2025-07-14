@@ -1,5 +1,9 @@
+from database import get_db_cursor
+import uuid
+import csv
 from flask import Blueprint, request, jsonify, abort, send_file
 from database import init_db, reset_db, get_db_stats
+from utils.helpers import init_teams_from_csv
 from utils.qr_generator import QRGenerator
 import os
 
@@ -65,3 +69,25 @@ def download_active_qr_codes():
         abort(403)
     file_path = QRGenerator.export_active_qr_codes_to_csv()
     return send_file(file_path, mimetype='text/csv', as_attachment=True, download_name='active_qr_codes.csv')
+
+
+#
+#   TEAMS
+#
+
+
+@admin_bp.route('/init-teams', methods=['POST'])
+def admin_init_teams():
+    if not is_authorized():
+        abort(403)
+
+    csv_path = os.path.join('static', 'data', 'teams.csv')
+
+    try:
+        result = init_teams_from_csv(csv_path)
+        return jsonify({
+            "message": "Team initialization completed.",
+            **result
+        })
+    except FileNotFoundError:
+        return jsonify({"error": "CSV file not found"}), 404

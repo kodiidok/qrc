@@ -13,12 +13,6 @@ class Config:
     # Database settings (default; can be overridden per environment)
     DB_NAME = os.getenv('DB_NAME', 'iot2025.db')
 
-    # Exhibition settings
-    ALLOWED_TEAMS = [
-        'team1', 'team2', 'team3', 'team4', 'team5', 'team6', 'team7',
-        'team8', 'team9', 'team10', 'team11', 'team12', 'team13'
-    ]
-
     # Minimum visits required for sticker eligibility
     MIN_VISITS_FOR_STICKER = int(os.getenv('MIN_VISITS_FOR_STICKER'))
 

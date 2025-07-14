@@ -38,6 +38,19 @@ def init_db():
     Initialize the database with required tables
     """
     with sqlite3.connect(Config.DB_NAME) as conn:
+        # Create teams table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS teams (
+                id TEXT PRIMARY KEY,                  -- UUID
+                team_name TEXT UNIQUE NOT NULL,       -- Human-readable name
+                project_title TEXT,
+                description TEXT,
+                members TEXT,
+                supervisor TEXT,
+                created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         # Create visitor_visits table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS visitor_visits (
@@ -49,7 +62,7 @@ def init_db():
             )
         ''')
 
-        # Create visitors table with generated QR codes
+        # Create visitors table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS visitors (
                 visitor_qr TEXT PRIMARY KEY,
@@ -64,7 +77,7 @@ def init_db():
             )
         ''')
 
-        # Create QR codes table for better organization
+        # Create qr_codes table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS qr_codes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +91,7 @@ def init_db():
             )
         ''')
 
-        # Create indexes for better performance
+        # Indexes
         conn.execute('''
             CREATE INDEX IF NOT EXISTS idx_visitor_visits_visitor_qr 
             ON visitor_visits(visitor_qr)
@@ -107,13 +120,12 @@ def reset_db():
     Drop all tables and recreate them (use with caution)
     """
     with sqlite3.connect(Config.DB_NAME) as conn:
-        # Drop tables
         conn.execute('DROP TABLE IF EXISTS visitor_visits')
         conn.execute('DROP TABLE IF EXISTS visitors')
         conn.execute('DROP TABLE IF EXISTS qr_codes')
+        conn.execute('DROP TABLE IF EXISTS teams')
         conn.commit()
 
-    # Recreate tables
     init_db()
 
 
@@ -125,6 +137,9 @@ def get_db_stats():
         cursor = conn.cursor()
 
         # Get table counts
+        cursor.execute("SELECT COUNT(*) as count FROM teams")
+        teams_count = cursor.fetchone()['count']
+
         cursor.execute("SELECT COUNT(*) as count FROM visitor_visits")
         visits_count = cursor.fetchone()['count']
 
@@ -135,6 +150,7 @@ def get_db_stats():
         qr_codes_count = cursor.fetchone()['count']
 
         return {
+            'teams': teams_count,
             'visitor_visits': visits_count,
             'visitors': visitors_count,
             'qr_codes': qr_codes_count
