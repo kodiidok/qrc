@@ -1,7 +1,7 @@
 from database import get_db_cursor
 import uuid
 import csv
-from flask import Blueprint, request, jsonify, abort, send_file, url_for
+from flask import Blueprint, request, jsonify, abort, send_file, url_for, render_template
 from database import init_db, reset_db, get_db_stats
 from utils.helpers import init_teams_from_csv
 from utils.qr_generator import QRGenerator

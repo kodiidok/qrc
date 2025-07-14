@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from database.database import get_db_cursor
 from utils.helpers import check_qr_code_exists, record_visitor_visit
 
 qr_bp = Blueprint('qr', __name__, url_prefix='/api')
@@ -24,3 +25,52 @@ def check_qr():
         })
 
     return jsonify({"exists": exists})
+
+
+@qr_bp.route('/check-visitor', methods=['POST'])
+def check_visitor():
+    data = request.get_json()
+    qr_code = data.get('qr_code', '').strip()
+
+    if not qr_code:
+        return jsonify({"error": "No QR code provided"}), 400
+
+    with get_db_cursor() as cursor:
+        # Get total visits
+        cursor.execute(
+            'SELECT * FROM visitors WHERE visitor_qr = ?', (qr_code,))
+        visitor = cursor.fetchone()
+
+        if not visitor:
+            return jsonify({"exists": False, "message": "Visitor not found"}), 404
+
+        total_visits = visitor["total_visits"]
+
+        if total_visits < 10:
+            return jsonify({
+                "exists": True,
+                "enough_visits": False,
+                "total_visits": total_visits,
+                "message": "Visitor has not completed 10 visits yet."
+            })
+
+        # Get visit log
+        cursor.execute('''
+            SELECT team_name, visit_time
+            FROM visitor_visits
+            WHERE visitor_qr = ?
+            ORDER BY visit_time DESC
+        ''', (qr_code,))
+        visits = cursor.fetchall()
+
+        visits_log = [
+            {"team_name": v["team_name"], "visit_time": v["visit_time"]}
+            for v in visits
+        ]
+
+    return jsonify({
+        "exists": True,
+        "enough_visits": True,
+        "total_visits": total_visits,
+        "visits": visits_log
+    })

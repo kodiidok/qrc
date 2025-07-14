@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin QR Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <h1 style="text-align: center;">Dispenser Admin QR Scanner</h1>
+    <div id="reader"></div>
+    <div id="result"></div>
+    <div id="log"></div>
+
+    <script>
+        window.ADMIN_TOKEN = "{{ admin_token }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/check-visitor.js') }}"></script>
+</body>
+
+</html>

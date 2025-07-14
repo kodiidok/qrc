@@ -11,3 +11,8 @@ def home():
 @app_bp.route('/scan-qr')
 def scan_qr():
     return render_template('scan_qr.html')
+
+
+@app_bp.route('/check-visitor')
+def admin_visitor_scanner():
+    return render_template('check-visitor.html')
