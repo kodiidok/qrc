@@ -3,6 +3,7 @@ QR Code Generation Utilities
 """
 
 import qrcode
+import csv
 import base64
 from datetime import datetime, timezone
 from io import BytesIO
@@ -70,3 +71,32 @@ class QRGenerator:
             ''', (now,))
 
         QRGenerator.init_qr_codes()
+
+    @staticmethod
+    def export_active_qr_codes_to_csv(csv_path='active_qr_codes.csv'):
+        """
+        Retrieve all non-deleted QR codes and save them to a CSV file.
+
+        :param csv_path: Path to save the CSV file
+        :return: Path to the generated CSV file
+        """
+        with get_db_cursor() as cursor:
+            cursor.execute('''
+                SELECT qr_code, qr_image_base64, generated_time, is_printed, is_distributed, notes
+                FROM qr_codes
+                WHERE deleted_time IS NULL
+                ORDER BY id
+            ''')
+            rows = cursor.fetchall()
+
+        # Define CSV headers matching selected columns
+        headers = ['qr_code', 'qr_image_base64', 'generated_time',
+                   'is_printed', 'is_distributed', 'notes']
+
+        with open(csv_path, mode='w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(headers)
+            for row in rows:
+                writer.writerow([row[h] for h in headers])
+
+        return csv_path

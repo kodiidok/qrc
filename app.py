@@ -2,7 +2,7 @@ import os
 import sqlite3
 import socket
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, abort
+from flask import Flask, request, jsonify, render_template, abort, send_file
 from dotenv import load_dotenv  # <-- for loading .env
 from config import config
 from database import init_db, get_db_stats, reset_db
@@ -77,6 +77,19 @@ def admin_reset_qr_codes():
     QRGenerator.reset_qr_codes()
     return jsonify({"message": "QR codes table cleared and reinitialized."})
 
+
+@app.route('/admin/download-active-qr-codes', methods=['GET'])
+def download_active_qr_codes():
+    if not is_authorized():
+        abort(403, description="Unauthorized")
+
+    csv_file = QRGenerator.export_active_qr_codes_to_csv()
+
+    # Return the CSV file as a download
+    return send_file(csv_file,
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     download_name='active_qr_codes.csv')
 
 #
 #   APP
