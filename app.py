@@ -1,127 +1,24 @@
 import os
-import sqlite3
-import socket
-from datetime import datetime
-from flask import Flask, request, jsonify, render_template, abort, send_file
-from dotenv import load_dotenv  # <-- for loading .env
+from flask import Flask
+from dotenv import load_dotenv
 from config import config
-from database import init_db, get_db_stats, reset_db
-from utils.helpers import check_qr_code_exists
-from utils.qr_generator import QRGenerator
+from database import init_db
+from routes import register_routes
 
-# Load env variables from .env file
+# Load env
 load_dotenv()
 
-# Create Flask app
+# Flask app
 app = Flask(__name__)
-
-# Load config based on environment
-env_name = os.getenv('FLASK_ENV')
+env_name = os.getenv('FLASK_ENV', 'development')
 app.config.from_object(config[env_name])
 
-# Admin token from environment
-ADMIN_TOKEN = os.getenv('ADMIN_TOKEN')
+# Register routes
+register_routes(app)
 
-
-def is_authorized():
-    """
-    Check for valid admin token in Authorization header
-    """
-    token = request.headers.get('Authorization')
-    return token == f"Bearer {ADMIN_TOKEN}"
-
-#
-#   DB
-#
-
-
-@app.route('/admin/stats')
-def admin_stats():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-    return jsonify(get_db_stats())
-
-
-@app.route('/admin/init-db', methods=['POST'])
-def admin_init_db():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-    init_db()
-    return jsonify({"message": "Database initialized."})
-
-
-@app.route('/admin/reset-db', methods=['POST'])
-def admin_reset_db():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-    reset_db()
-    return jsonify({"message": "Database reset and reinitialized."})
-
-
-#
-#   QR
-#
-
-
-@app.route('/admin/init-qr-codes', methods=['POST'])
-def admin_init_qr_codes():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-    QRGenerator.init_qr_codes()
-    return jsonify({"message": "QR codes initialized."})
-
-
-@app.route('/admin/reset-qr-codes', methods=['POST'])
-def admin_reset_qr_codes():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-    QRGenerator.reset_qr_codes()
-    return jsonify({"message": "QR codes table cleared and reinitialized."})
-
-
-@app.route('/admin/download-active-qr-codes', methods=['GET'])
-def download_active_qr_codes():
-    if not is_authorized():
-        abort(403, description="Unauthorized")
-
-    csv_file = QRGenerator.export_active_qr_codes_to_csv()
-
-    # Return the CSV file as a download
-    return send_file(csv_file,
-                     mimetype='text/csv',
-                     as_attachment=True,
-                     download_name='active_qr_codes.csv')
-
-
-@app.route('/api/check-qr', methods=['POST'])
-def check_qr():
-    data = request.get_json()
-    qr_code = data.get('qr_code', '').strip()
-
-    if not qr_code:
-        return jsonify({"error": "No QR code provided"}), 400
-
-    exists = check_qr_code_exists(qr_code)
-
-    return jsonify({"exists": exists, "qr_code": qr_code} if exists else {"exists": False})
-
-#
-#   APP
-#
-
-
-@app.route('/')
-def home():
-    return f"App is running with config: {app.config['DB_NAME']}"
-
-
-@app.route('/scan-qr')
-def scan_qr():
-    return render_template('scan_qr.html')
-
-
+# Auto-init DB for dev
 if __name__ == '__main__':
     if env_name == 'development':
-        print("🔧 Auto-initializing database (dev mode)...")
+        print("🔧 Auto-initializing database...")
         init_db()
     app.run(host='127.0.0.1', port=5000, debug=app.config['DEBUG'])

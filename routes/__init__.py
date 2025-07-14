@@ -1,9 +1,10 @@
-# Routes package initialization file
-# This file makes the routes directory a Python package
+from flask import Blueprint
+from .admin_routes import admin_bp
+from .qr_routes import qr_bp
+from .app_routes import app_bp
 
-from .admin import admin_bp
-from .team import team_bp
-from .visitor import visitor_bp
-from .qr_codes import qr_codes_bp
 
-__all__ = ['admin_bp', 'team_bp', 'visitor_bp', 'qr_codes_bp']
+def register_routes(app):
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(qr_bp)
+    app.register_blueprint(app_bp)
