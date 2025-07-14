@@ -1,6 +1,7 @@
 """
 Helper functions for the IOT Exhibition application
 """
+from datetime import datetime
 import os
 import uuid
 import csv
@@ -76,3 +77,80 @@ def init_teams_from_csv(csv_path: str) -> dict:
                 created += 1
 
     return {"teams_created": created, "teams_skipped": skipped}
+
+
+def record_visitor_visit(qr_code: str, team_id: str) -> dict:
+    """
+    Records a visit for a visitor to a team.
+    Updates both visitor_visits and visitors table.
+
+    Returns:
+        dict: {
+            'recorded': True/False,
+            'visitor_created': True/False,
+            'already_visited': True/False
+        }
+    """
+    from uuid import UUID
+    try:
+        UUID(team_id)  # Validate UUID
+    except ValueError:
+        return {"recorded": False, "error": "Invalid team_id"}
+
+    result = {
+        "recorded": False,
+        "visitor_created": False,
+        "already_visited": False
+    }
+
+    now = datetime.utcnow().isoformat()
+
+    with get_db_cursor() as cursor:
+        # Lookup team name
+        cursor.execute("SELECT team_name FROM teams WHERE id = ?", (team_id,))
+        team_row = cursor.fetchone()
+        if not team_row:
+            return {"recorded": False, "error": "Team not found"}
+
+        team_name = team_row["team_name"]
+
+        # Check if already visited this team
+        cursor.execute('''
+            SELECT 1 FROM visitor_visits
+            WHERE visitor_qr = ? AND team_name = ?
+        ''', (qr_code, team_name))
+
+        if cursor.fetchone():
+            result['already_visited'] = True
+            return result  # No duplicate insert
+
+        # Insert into visitor_visits
+        cursor.execute('''
+            INSERT INTO visitor_visits (visitor_qr, team_name, visit_time)
+            VALUES (?, ?, ?)
+        ''', (qr_code, team_name, now))
+
+        result['recorded'] = True
+
+        # Check if visitor exists
+        cursor.execute(
+            "SELECT * FROM visitors WHERE visitor_qr = ?", (qr_code,))
+        visitor_row = cursor.fetchone()
+
+        if visitor_row:
+            # Update total_visits and last_visit
+            total = visitor_row["total_visits"] or 0
+            cursor.execute('''
+                UPDATE visitors
+                SET total_visits = ?, last_visit = ?
+                WHERE visitor_qr = ?
+            ''', (total + 1, now, qr_code))
+        else:
+            # Insert new visitor
+            cursor.execute('''
+                INSERT INTO visitors (visitor_qr, first_visit, last_visit, total_visits)
+                VALUES (?, ?, ?, ?)
+            ''', (qr_code, now, now, 1))
+            result['visitor_created'] = True
+
+    return result
