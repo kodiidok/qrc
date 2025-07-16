@@ -1,4 +1,4 @@
-body {
+/* body {
     font-family: Arial, sans-serif;
     text-align: center;
     margin-top: 100px;
@@ -37,4 +37,169 @@ td {
     margin-top: 20px;
     font-size: 1.1em;
     text-align: center;
+} */
+
+
+/* General Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Headings */
+h1 {
+    font-size: 2.5rem;
+    color: #343a40;
+    margin-bottom: 0.25em;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #6c757d;
+    margin-bottom: 1.5em;
+}
+
+h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+/* Scanner Container */
+#reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Result & Log */
+#result,
+#log {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#final-result {
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f3f5;
+    font-weight: 600;
+}
+
+/* Buttons */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Layout */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    #reader #final-reader,
+    #result,
+    #log {
+        width: 95%;
+    }
+
+    table {
+        font-size: 0.85rem;
+    }
+}
+
+.result-message {
+    font-size: 1.8rem;
+    font-weight: bold;
+    padding: 20px;
+    border-radius: 16px;
+    max-width: 90%;
+    width: 100%;
+    text-align: center;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+/* Colored message types */
+.success {
+    background-color: #28a745;
+}
+
+.warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.error {
+    background-color: #dc3545;
+}
+
+/* GIF styling */
+.result-gif {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 12px;
 }

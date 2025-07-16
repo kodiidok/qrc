@@ -23,9 +23,9 @@ function onScanSuccess(decodedText, decodedResult) {
     .then((response) => response.json())
     .then((data) => {
       if (data.exists) {
-        resultDiv.innerText = `QR Code exists in database. ✅`;
+        resultDiv.innerText = `QR Code Accepted ✅. Thank You for Joining with Us!`;
       } else {
-        resultDiv.innerText = `QR Code NOT found in database. ❌`;
+        resultDiv.innerText = `Invalid QR Code. ❌`;
       }
       addRescanButton();
     })
